@@ -1,0 +1,54 @@
+service: api-demo-redis
+
+provider:
+  name: aws
+  runtime: java8
+  timeout: 30
+  stage: ${env:ENVIRONMENT, 'dev'}
+  environment:
+    endpointredis: '127.0.0.1' #!ImportValue RedisEndPointConfiguration
+    auth: 29fcfd68ee3a8d6504a74d5a8aec40e7
+  vpc:
+    securityGroupIds:
+      #- !ImportValue DemoVPC-SGID
+      - sg-0960699883ca5ebeb
+    subnetIds:
+      #- !ImportValue DemoVPC-SubNetPublicaID
+      - subnet-0b1d5c15081fcf21a
+      - subnet-0e9897263fec2ca6a
+package:
+  artifact: target/api-demo-redis-1.0.0.jar
+
+functions:
+  helloWorld:
+    handler: br.com.demo.handler.DemoHandler
+    warmup: prd
+    #events:
+    #- http:
+        #path: /v1/demo
+        #method: get
+        #cors: true
+  DemoSetElastiCacheComRedis:
+    handler: br.com.demo.handler.DemoSetElastiCacheComRedisHandler
+    warmup: prd
+    events:
+    - http:
+        path: /v1/demo/elasticache/redis
+        method: post
+        cors: true
+  DemoGetElastiCacheComRedis:
+    handler: br.com.demo.handler.DemoGetElastiCacheComRedisHandler
+    warmup: prd
+    events:
+    - http:
+        path: /v1/demo/elasticache/redis/key/{key}
+        method: get
+        cors: true
+  DemoDelElastiCacheComRedis:
+    handler: br.com.demo.handler.DemoDelElastiCacheComRedisHandler
+    warmup: prd
+    events:
+    - http:
+        path: /v1/demo/elasticache/redis/key/{key}
+        method: delete
+        cors: true
